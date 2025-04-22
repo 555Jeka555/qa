@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"lab8/model"
@@ -10,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 )
+
+var ErrBadRequest = errors.New("bad request")
 
 type APIClient struct {
 	BaseURL string
@@ -81,7 +84,7 @@ func (c *APIClient) AddProduct(product model.Product) (string, error) {
 
 	err = c.checkOnError(bodyString)
 	if err != nil {
-		return "", err
+		return "", ErrBadRequest
 	}
 
 	var productAddedResp productAddedResponse
@@ -153,6 +156,8 @@ func (c *APIClient) DeleteProduct(id string) (int, error) {
 }
 
 func (c *APIClient) checkOnError(bodyString string) error {
+	//fmt.Println("bodyString", bodyString)
+
 	if strings.Contains(bodyString, "<h1>Произошла ошибка</h1>") {
 		return fmt.Errorf("error: %s", bodyString)
 	}

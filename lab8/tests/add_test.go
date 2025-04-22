@@ -1,103 +1,81 @@
 package tests
 
 import (
+	"github.com/stretchr/testify/assert"
 	"lab8/api"
 	"lab8/model"
 	"testing"
 )
 
-func TestAddProduct(t *testing.T) {
-	config, err := LoadTestConfig(pathToTestConfig)
+func TestValidAddProduct(t *testing.T) {
+	config, err := LoadTestConfig(pathToValidTestCasesConfig)
 	if err != nil {
 		t.Fatalf("Failed to load test config: %v", err)
 	}
 
 	client := api.NewAPIClient(config.BaseURL)
 
-	t.Run("Add valid product", func(t *testing.T) {
-		product := config.Products[0] // valid_product
-		id, err := client.AddProduct(product)
-		if err != nil {
-			t.Fatalf("Failed to add product: %v", err)
-		}
-
-		createdProducts, err := client.GetAllProducts()
-		if err != nil {
-			t.Fatalf("Failed to add product: %v", err)
-		}
-		var createdProduct model.Product
-		for _, p := range createdProducts {
-			if p.ID == id {
-				createdProduct = p
-				break
+	for testcaseName, product := range config.TestCases {
+		t.Run(testcaseName, func(t *testing.T) {
+			id, err := client.AddProduct(product)
+			if err != nil {
+				t.Fatalf("Failed to add product: %v", err)
 			}
-		}
 
-		defer func() {
-			if _, err := client.DeleteProduct(createdProduct.ID); err != nil {
-				t.Errorf("Failed to cleanup product: %v", err)
+			products, err := client.GetAllProducts()
+			if err != nil {
+				t.Fatalf("Failed to add product: %v", err)
 			}
-		}()
+			createdProduct := FindProductByID(id, products)
 
-		CompareProducts(t, product, createdProduct)
+			defer func() {
+				if _, err := client.DeleteProduct(createdProduct.ID); err != nil {
+					t.Errorf("Failed to cleanup product: %v", err)
+				}
+			}()
 
-		if createdProduct.ID == "0" {
-			t.Error("Product ID should not be 0")
-		}
-		if createdProduct.Alias == "" {
-			t.Error("Alias should be generated")
-		}
-	})
+			CompareProducts(t, product, createdProduct)
 
-	t.Run("Add product with invalid category", func(t *testing.T) {
-		product := config.Products[1]
-		id, err := client.AddProduct(product)
-		if err == nil {
-			t.Fatalf("Failed to add product: %v", err)
-		}
-
-		createdProducts, err := client.GetAllProducts()
-		if err != nil {
-			t.Fatalf("Failed to add product: %v", err)
-		}
-		var createdProduct model.Product
-		for _, p := range createdProducts {
-			if p.ID == id {
-				createdProduct = p
-				break
+			if createdProduct.ID == "0" {
+				t.Error("Product ID should not be 0")
 			}
-		}
-
-		defer func() {
-			if _, err := client.DeleteProduct(createdProduct.ID); err != nil {
-				t.Errorf("Failed to cleanup product: %v", err)
+			if createdProduct.Alias == "" {
+				t.Error("Alias should be generated")
 			}
-		}()
-	})
+		})
+	}
+}
 
-	t.Run("Add valid product with empty title", func(t *testing.T) {
-		product := config.Products[2]
-		id, err := client.AddProduct(product)
-		if err == nil {
-			t.Fatalf("Failed to add product: %v", err)
-		}
+func TestInvalidAddProduct(t *testing.T) {
+	config, err := LoadTestConfig(pathToInvalidTestCasesConfig)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
 
-		createdProducts, err := client.GetAllProducts()
-		if err != nil {
-			t.Fatalf("Failed to add product: %v", err)
-		}
-		var createdProduct model.Product
-		for _, p := range createdProducts {
-			if p.ID == id {
-				createdProduct = p
-				break
+	client := api.NewAPIClient(config.BaseURL)
+
+	for testcaseName, product := range config.TestCases {
+		t.Run(testcaseName, func(t *testing.T) {
+			id, err := client.AddProduct(product)
+			assert.ErrorIs(t, err, api.ErrBadRequest)
+
+			createdProducts, err := client.GetAllProducts()
+			if err != nil {
+				t.Fatalf("Failed to add product: %v", err)
 			}
-		}
-
-		defer func() {
-			if _, err := client.DeleteProduct(createdProduct.ID); err != nil {
-				t.Errorf("Failed to cleanup product: %v", err)
+			var createdProduct model.Product
+			for _, p := range createdProducts {
+				if p.ID == id {
+					createdProduct = p
+					break
+				}
 			}
-		}()
-	})
+
+			defer func() {
+				if _, err := client.DeleteProduct(createdProduct.ID); err != nil {
+					t.Errorf("Failed to cleanup product: %v", err)
+				}
+			}()
+		})
+	}
 }
