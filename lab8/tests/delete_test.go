@@ -1,7 +1,9 @@
 package tests
 
 import (
+	"github.com/stretchr/testify/assert"
 	"lab8/api"
+	"lab8/model"
 	"testing"
 )
 
@@ -13,9 +15,8 @@ func TestDeleteProduct(t *testing.T) {
 
 	client := api.NewAPIClient(config.BaseURL)
 
-	// Setup: create a product to delete
-	product := config.Products[0] // valid_product
-	err = client.AddProduct(product)
+	product := config.Products[0]
+	id, err := client.AddProduct(product)
 	if err != nil {
 		t.Fatalf("Failed to setup test: %v", err)
 	}
@@ -24,15 +25,21 @@ func TestDeleteProduct(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to add product: %v", err)
 	}
-	createdProduct := createdProducts[0]
+	var createdProduct model.Product
+	for _, p := range createdProducts {
+		if p.ID == id {
+			createdProduct = p
+			break
+		}
+	}
 
-	// Test valid delete
 	t.Run("Delete existing product", func(t *testing.T) {
-		if err := client.DeleteProduct(createdProduct.ID); err != nil {
+		status, err := client.DeleteProduct(createdProduct.ID)
+		if err != nil {
 			t.Fatalf("Failed to delete product: %v", err)
 		}
+		assert.Equal(t, status, 1)
 
-		// Verify product is deleted
 		products, err := client.GetAllProducts()
 		if err != nil {
 			t.Fatalf("Failed to get products: %v", err)
@@ -46,10 +53,11 @@ func TestDeleteProduct(t *testing.T) {
 		}
 	})
 
-	// Test delete non-existing product
 	t.Run("Delete non-existing product", func(t *testing.T) {
-		if err := client.DeleteProduct("-999999"); err == nil {
-			t.Error("Expected error for non-existing product, but got none")
+		status, err := client.DeleteProduct("-999999")
+		if err != nil {
+			t.Fatalf("Failed to delete product: %v", err)
 		}
+		assert.Equal(t, status, 0)
 	})
 }

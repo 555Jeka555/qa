@@ -2,6 +2,7 @@ package tests
 
 import (
 	"lab8/api"
+	"lab8/model"
 	"testing"
 )
 
@@ -16,7 +17,7 @@ func TestAddProduct(t *testing.T) {
 	// Test valid product
 	t.Run("Add valid product", func(t *testing.T) {
 		product := config.Products[0] // valid_product
-		err := client.AddProduct(product)
+		id, err := client.AddProduct(product)
 		if err != nil {
 			t.Fatalf("Failed to add product: %v", err)
 		}
@@ -25,11 +26,17 @@ func TestAddProduct(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to add product: %v", err)
 		}
-		createdProduct := createdProducts[len(createdProducts)-1]
+		var createdProduct model.Product
+		for _, p := range createdProducts {
+			if p.ID == id {
+				createdProduct = p
+				break
+			}
+		}
 
 		// Cleanup
 		defer func() {
-			if err := client.DeleteProduct(createdProduct.ID); err != nil {
+			if _, err := client.DeleteProduct(createdProduct.ID); err != nil {
 				t.Errorf("Failed to cleanup product: %v", err)
 			}
 		}()
@@ -46,22 +53,53 @@ func TestAddProduct(t *testing.T) {
 		}
 	})
 
-	// Test invalid category
 	t.Run("Add product with invalid category", func(t *testing.T) {
-		product := config.Products[1] // invalid_category
-		err := client.AddProduct(product)
+		product := config.Products[1]
+		id, err := client.AddProduct(product)
 		if err == nil {
-			t.Error("Expected error for invalid category, but got none")
+			t.Fatalf("Failed to add product: %v", err)
 		}
 
 		createdProducts, err := client.GetAllProducts()
 		if err != nil {
 			t.Fatalf("Failed to add product: %v", err)
 		}
-		createdProduct := createdProducts[len(createdProducts)-1]
+		var createdProduct model.Product
+		for _, p := range createdProducts {
+			if p.ID == id {
+				createdProduct = p
+				break
+			}
+		}
 
 		defer func() {
-			if err := client.DeleteProduct(createdProduct.ID); err != nil {
+			if _, err := client.DeleteProduct(createdProduct.ID); err != nil {
+				t.Errorf("Failed to cleanup product: %v", err)
+			}
+		}()
+	})
+
+	t.Run("Add valid product with empty title", func(t *testing.T) {
+		product := config.Products[2]
+		id, err := client.AddProduct(product)
+		if err == nil {
+			t.Fatalf("Failed to add product: %v", err)
+		}
+
+		createdProducts, err := client.GetAllProducts()
+		if err != nil {
+			t.Fatalf("Failed to add product: %v", err)
+		}
+		var createdProduct model.Product
+		for _, p := range createdProducts {
+			if p.ID == id {
+				createdProduct = p
+				break
+			}
+		}
+
+		defer func() {
+			if _, err := client.DeleteProduct(createdProduct.ID); err != nil {
 				t.Errorf("Failed to cleanup product: %v", err)
 			}
 		}()

@@ -2,6 +2,7 @@ package tests
 
 import (
 	"encoding/json"
+	"github.com/stretchr/testify/assert"
 	"lab8/model"
 	"os"
 	"testing"
@@ -30,31 +31,24 @@ func LoadTestConfig(path string) (*TestConfig, error) {
 }
 
 func CompareProducts(t *testing.T, expected, actual model.Product) {
-	if expected.CategoryID != actual.CategoryID {
-		t.Errorf("CategoryID mismatch: expected %s, got %s", expected.CategoryID, actual.CategoryID)
+	fields := []struct {
+		name     string
+		expected interface{}
+		actual   interface{}
+	}{
+		{"CategoryID", expected.CategoryID, actual.CategoryID},
+		{"Title", expected.Title, actual.Title},
+		{"Content", expected.Content, actual.Content},
+		{"Price", expected.Price, actual.Price},
+		{"OldPrice", expected.OldPrice, actual.OldPrice},
+		{"Status", expected.Status, actual.Status},
+		{"Keywords", expected.Keywords, actual.Keywords},
+		{"Description", expected.Description, actual.Description},
+		{"Hit", expected.Hit, actual.Hit},
 	}
-	if expected.Title != actual.Title {
-		t.Errorf("Title mismatch: expected '%s', got '%s'", expected.Title, actual.Title)
-	}
-	if expected.Content != actual.Content {
-		t.Errorf("Content mismatch: expected '%s', got '%s'", expected.Content, actual.Content)
-	}
-	if expected.Price != actual.Price {
-		t.Errorf("Price mismatch: expected %s, got %s", expected.Price, actual.Price)
-	}
-	if expected.OldPrice != actual.OldPrice {
-		t.Errorf("OldPrice mismatch: expected %s, got %s", expected.OldPrice, actual.OldPrice)
-	}
-	if expected.Status != actual.Status {
-		t.Errorf("Status mismatch: expected %s, got %s", expected.Status, actual.Status)
-	}
-	if expected.Keywords != actual.Keywords {
-		t.Errorf("Keywords mismatch: expected '%s', got '%s'", expected.Keywords, actual.Keywords)
-	}
-	if expected.Description != actual.Description {
-		t.Errorf("Description mismatch: expected '%s', got '%s'", expected.Description, actual.Description)
-	}
-	if expected.Hit != actual.Hit {
-		t.Errorf("Hit mismatch: expected %s, got %s", expected.Hit, actual.Hit)
+
+	for _, field := range fields {
+		assert.Equal(t, field.expected, field.actual,
+			"%s mismatch", field.name)
 	}
 }

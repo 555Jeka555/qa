@@ -26,6 +26,19 @@
       "keywords": "test,product",
       "description": "Test Description",
       "hit": "1"
+    },
+    {
+      "name": "empty_title",
+      "id": "0",
+      "category_id": "999",
+      "title": "Empty title",
+      "content": "Test Content",
+      "price": "100",
+      "old_price": "120",
+      "status": "1",
+      "keywords": "test,product",
+      "description": "Test Description",
+      "hit": "1"
     }
   ]
 }

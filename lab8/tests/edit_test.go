@@ -2,6 +2,7 @@ package tests
 
 import (
 	"lab8/api"
+	"lab8/model"
 	"testing"
 )
 
@@ -13,9 +14,8 @@ func TestEditProduct(t *testing.T) {
 
 	client := api.NewAPIClient(config.BaseURL)
 
-	// Setup: create a product to edit
 	product := config.Products[0] // valid_product
-	err = client.AddProduct(product)
+	id, err := client.AddProduct(product)
 	if err != nil {
 		t.Fatalf("Failed to setup test: %v", err)
 	}
@@ -24,16 +24,20 @@ func TestEditProduct(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to add product: %v", err)
 	}
-	createdProduct := createdProducts[0]
+	var createdProduct model.Product
+	for _, p := range createdProducts {
+		if p.ID == id {
+			createdProduct = p
+			break
+		}
+	}
 
-	// Cleanup
 	defer func() {
-		if err := client.DeleteProduct(createdProduct.ID); err != nil {
+		if _, err := client.DeleteProduct(createdProduct.ID); err != nil {
 			t.Errorf("Failed to cleanup product: %v", err)
 		}
 	}()
 
-	// Test valid update
 	t.Run("Edit product with valid data", func(t *testing.T) {
 		updated := createdProduct
 		updated.Title = "Updated Title"
@@ -47,7 +51,6 @@ func TestEditProduct(t *testing.T) {
 		CompareProducts(t, updated, *result)
 	})
 
-	// Test invalid update (invalid category)
 	t.Run("Edit product with invalid category", func(t *testing.T) {
 		updated := createdProduct
 		updated.CategoryID = "999"
@@ -58,7 +61,6 @@ func TestEditProduct(t *testing.T) {
 		}
 	})
 
-	// Test invalid update (empty title)
 	t.Run("Edit product with empty title", func(t *testing.T) {
 		updated := createdProduct
 		updated.Title = ""

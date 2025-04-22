@@ -7,6 +7,7 @@ import (
 	"io"
 	"lab8/model"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -16,6 +17,15 @@ type APIClient struct {
 
 func NewAPIClient(baseURL string) *APIClient {
 	return &APIClient{BaseURL: baseURL}
+}
+
+type productAddedResponse struct {
+	ID     int `json:"id"`
+	Status int `json:"status"`
+}
+
+type productDeletedResponse struct {
+	Status int `json:"status"`
 }
 
 func (c *APIClient) GetAllProducts() ([]model.Product, error) {
@@ -34,7 +44,6 @@ func (c *APIClient) GetAllProducts() ([]model.Product, error) {
 		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
 	bodyString := string(bodyBytes)
-	fmt.Println("Raw response:", bodyString)
 
 	var products []model.Product
 	if err := json.Unmarshal(bodyBytes, &products); err != nil {
@@ -44,10 +53,10 @@ func (c *APIClient) GetAllProducts() ([]model.Product, error) {
 	return products, nil
 }
 
-func (c *APIClient) AddProduct(product model.Product) error {
+func (c *APIClient) AddProduct(product model.Product) (string, error) {
 	body, err := json.Marshal(product)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	resp, err := http.Post(
@@ -56,15 +65,31 @@ func (c *APIClient) AddProduct(product model.Product) error {
 		bytes.NewBuffer(body),
 	)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		return "", fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	return c.checkOnError(resp)
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to read response body: %v", err)
+	}
+	bodyString := string(bodyBytes)
+
+	err = c.checkOnError(bodyString)
+	if err != nil {
+		return "", err
+	}
+
+	var productAddedResp productAddedResponse
+	if err := json.Unmarshal(bodyBytes, &productAddedResp); err != nil {
+		return "", fmt.Errorf("failed to unmarshal JSON: %v, raw response: %s", err, bodyString)
+	}
+
+	return strconv.Itoa(productAddedResp.ID), nil
 }
 
 func (c *APIClient) EditProduct(product model.Product) (*model.Product, error) {
@@ -96,30 +121,37 @@ func (c *APIClient) EditProduct(product model.Product) (*model.Product, error) {
 	return &updatedProduct, nil
 }
 
-func (c *APIClient) DeleteProduct(id string) error {
+func (c *APIClient) DeleteProduct(id string) (int, error) {
 	resp, err := http.Get(fmt.Sprintf("%s/api/deleteproduct?id=%s", c.BaseURL, id))
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		return 0, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	return nil
-}
-
-func (c *APIClient) checkOnError(resp *http.Response) error {
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("failed to read response body: %v", err)
+		return 0, fmt.Errorf("failed to read response body: %v", err)
 	}
 	bodyString := string(bodyBytes)
 
-	fmt.Println("Raw response:", bodyString)
-	fmt.Println("Contains", strings.Contains(bodyString, "<h1>Произошла ошибка</h1>"))
+	err = c.checkOnError(bodyString)
+	if err != nil {
+		return 0, err
+	}
 
+	var productDeletedResp productDeletedResponse
+	if err := json.Unmarshal(bodyBytes, &productDeletedResp); err != nil {
+		return 0, fmt.Errorf("failed to unmarshal JSON: %v, raw response: %s", err, bodyString)
+	}
+
+	return productDeletedResp.Status, nil
+}
+
+func (c *APIClient) checkOnError(bodyString string) error {
 	if strings.Contains(bodyString, "<h1>Произошла ошибка</h1>") {
 		return fmt.Errorf("error: %s", bodyString)
 	}
