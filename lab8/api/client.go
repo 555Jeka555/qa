@@ -92,10 +92,10 @@ func (c *APIClient) AddProduct(product model.Product) (string, error) {
 	return strconv.Itoa(productAddedResp.ID), nil
 }
 
-func (c *APIClient) EditProduct(product model.Product) (*model.Product, error) {
+func (c *APIClient) EditProduct(product model.Product) error {
 	body, err := json.Marshal(product)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	resp, err := http.Post(
@@ -104,21 +104,22 @@ func (c *APIClient) EditProduct(product model.Product) (*model.Product, error) {
 		bytes.NewBuffer(body),
 	)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
+		return fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
 	}
 
-	var updatedProduct model.Product
-	if err := json.NewDecoder(resp.Body).Decode(&updatedProduct); err != nil {
-		return nil, err
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response body: %v", err)
 	}
+	bodyString := string(bodyBytes)
 
-	return &updatedProduct, nil
+	return c.checkOnError(bodyString)
 }
 
 func (c *APIClient) DeleteProduct(id string) (int, error) {

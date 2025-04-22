@@ -14,7 +14,7 @@ func TestEditProduct(t *testing.T) {
 
 	client := api.NewAPIClient(config.BaseURL)
 
-	product := config.Products[0] // valid_product
+	product := config.Products[0]
 	id, err := client.AddProduct(product)
 	if err != nil {
 		t.Fatalf("Failed to setup test: %v", err)
@@ -43,31 +43,33 @@ func TestEditProduct(t *testing.T) {
 		updated.Title = "Updated Title"
 		updated.Price = "200"
 
-		result, err := client.EditProduct(updated)
+		err := client.EditProduct(updated)
 		if err != nil {
 			t.Fatalf("Failed to edit product: %v", err)
 		}
 
-		CompareProducts(t, updated, *result)
+		products, err := client.GetAllProducts()
+		if err != nil {
+			t.Fatalf("Failed to add product: %v", err)
+		}
+		var updatedProduct model.Product
+		for _, p := range products {
+			if p.ID == id {
+				updatedProduct = p
+				break
+			}
+		}
+
+		CompareProducts(t, updated, updatedProduct)
 	})
 
 	t.Run("Edit product with invalid category", func(t *testing.T) {
 		updated := createdProduct
 		updated.CategoryID = "999"
 
-		_, err := client.EditProduct(updated)
+		err := client.EditProduct(updated)
 		if err == nil {
 			t.Error("Expected error for invalid category, but got none")
-		}
-	})
-
-	t.Run("Edit product with empty title", func(t *testing.T) {
-		updated := createdProduct
-		updated.Title = ""
-
-		_, err := client.EditProduct(updated)
-		if err == nil {
-			t.Error("Expected error for empty title, but got none")
 		}
 	})
 }

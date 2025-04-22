@@ -14,7 +14,6 @@ func TestAddProduct(t *testing.T) {
 
 	client := api.NewAPIClient(config.BaseURL)
 
-	// Test valid product
 	t.Run("Add valid product", func(t *testing.T) {
 		product := config.Products[0] // valid_product
 		id, err := client.AddProduct(product)
@@ -34,17 +33,14 @@ func TestAddProduct(t *testing.T) {
 			}
 		}
 
-		// Cleanup
 		defer func() {
 			if _, err := client.DeleteProduct(createdProduct.ID); err != nil {
 				t.Errorf("Failed to cleanup product: %v", err)
 			}
 		}()
 
-		// Verify fields
 		CompareProducts(t, product, createdProduct)
 
-		// Verify auto-generated fields
 		if createdProduct.ID == "0" {
 			t.Error("Product ID should not be 0")
 		}
