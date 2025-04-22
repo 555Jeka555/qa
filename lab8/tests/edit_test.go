@@ -15,10 +15,16 @@ func TestEditProduct(t *testing.T) {
 
 	// Setup: create a product to edit
 	product := config.Products[0] // valid_product
-	createdProduct, err := client.AddProduct(product)
+	err = client.AddProduct(product)
 	if err != nil {
 		t.Fatalf("Failed to setup test: %v", err)
 	}
+
+	createdProducts, err := client.GetAllProducts()
+	if err != nil {
+		t.Fatalf("Failed to add product: %v", err)
+	}
+	createdProduct := createdProducts[0]
 
 	// Cleanup
 	defer func() {
@@ -29,9 +35,9 @@ func TestEditProduct(t *testing.T) {
 
 	// Test valid update
 	t.Run("Edit product with valid data", func(t *testing.T) {
-		updated := *createdProduct
+		updated := createdProduct
 		updated.Title = "Updated Title"
-		updated.Price = 200
+		updated.Price = "200"
 
 		result, err := client.EditProduct(updated)
 		if err != nil {
@@ -43,8 +49,8 @@ func TestEditProduct(t *testing.T) {
 
 	// Test invalid update (invalid category)
 	t.Run("Edit product with invalid category", func(t *testing.T) {
-		updated := *createdProduct
-		updated.CategoryID = 999
+		updated := createdProduct
+		updated.CategoryID = "999"
 
 		_, err := client.EditProduct(updated)
 		if err == nil {
@@ -54,7 +60,7 @@ func TestEditProduct(t *testing.T) {
 
 	// Test invalid update (empty title)
 	t.Run("Edit product with empty title", func(t *testing.T) {
-		updated := *createdProduct
+		updated := createdProduct
 		updated.Title = ""
 
 		_, err := client.EditProduct(updated)

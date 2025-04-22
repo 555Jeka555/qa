@@ -31,7 +31,7 @@ func LoadTestConfig(path string) (*TestConfig, error) {
 
 func CompareProducts(t *testing.T, expected, actual model.Product) {
 	if expected.CategoryID != actual.CategoryID {
-		t.Errorf("CategoryID mismatch: expected %d, got %d", expected.CategoryID, actual.CategoryID)
+		t.Errorf("CategoryID mismatch: expected %s, got %s", expected.CategoryID, actual.CategoryID)
 	}
 	if expected.Title != actual.Title {
 		t.Errorf("Title mismatch: expected '%s', got '%s'", expected.Title, actual.Title)
@@ -40,13 +40,13 @@ func CompareProducts(t *testing.T, expected, actual model.Product) {
 		t.Errorf("Content mismatch: expected '%s', got '%s'", expected.Content, actual.Content)
 	}
 	if expected.Price != actual.Price {
-		t.Errorf("Price mismatch: expected %d, got %d", expected.Price, actual.Price)
+		t.Errorf("Price mismatch: expected %s, got %s", expected.Price, actual.Price)
 	}
 	if expected.OldPrice != actual.OldPrice {
-		t.Errorf("OldPrice mismatch: expected %d, got %d", expected.OldPrice, actual.OldPrice)
+		t.Errorf("OldPrice mismatch: expected %s, got %s", expected.OldPrice, actual.OldPrice)
 	}
 	if expected.Status != actual.Status {
-		t.Errorf("Status mismatch: expected %d, got %d", expected.Status, actual.Status)
+		t.Errorf("Status mismatch: expected %s, got %s", expected.Status, actual.Status)
 	}
 	if expected.Keywords != actual.Keywords {
 		t.Errorf("Keywords mismatch: expected '%s', got '%s'", expected.Keywords, actual.Keywords)
@@ -55,6 +55,6 @@ func CompareProducts(t *testing.T, expected, actual model.Product) {
 		t.Errorf("Description mismatch: expected '%s', got '%s'", expected.Description, actual.Description)
 	}
 	if expected.Hit != actual.Hit {
-		t.Errorf("Hit mismatch: expected %d, got %d", expected.Hit, actual.Hit)
+		t.Errorf("Hit mismatch: expected %s, got %s", expected.Hit, actual.Hit)
 	}
 }

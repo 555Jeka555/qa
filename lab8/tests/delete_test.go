@@ -15,10 +15,16 @@ func TestDeleteProduct(t *testing.T) {
 
 	// Setup: create a product to delete
 	product := config.Products[0] // valid_product
-	createdProduct, err := client.AddProduct(product)
+	err = client.AddProduct(product)
 	if err != nil {
 		t.Fatalf("Failed to setup test: %v", err)
 	}
+
+	createdProducts, err := client.GetAllProducts()
+	if err != nil {
+		t.Fatalf("Failed to add product: %v", err)
+	}
+	createdProduct := createdProducts[0]
 
 	// Test valid delete
 	t.Run("Delete existing product", func(t *testing.T) {
@@ -42,7 +48,7 @@ func TestDeleteProduct(t *testing.T) {
 
 	// Test delete non-existing product
 	t.Run("Delete non-existing product", func(t *testing.T) {
-		if err := client.DeleteProduct(999999); err == nil {
+		if err := client.DeleteProduct("-999999"); err == nil {
 			t.Error("Expected error for non-existing product, but got none")
 		}
 	})
