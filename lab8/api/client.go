@@ -122,7 +122,12 @@ func (c *APIClient) EditProduct(product model.Product) error {
 	}
 	bodyString := string(bodyBytes)
 
-	return c.checkOnError(bodyString)
+	err = c.checkOnError(bodyString)
+	if err != nil {
+		return ErrBadRequest
+	}
+
+	return nil
 }
 
 func (c *APIClient) DeleteProduct(id string) (int, error) {

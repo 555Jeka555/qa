@@ -36,7 +36,7 @@
     },
     "valid_product_max_title": {
       "category_id": "14",
-      "title": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "title": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "content": "This is a test product.",
       "price": "100",
       "old_price": "120",
@@ -191,18 +191,6 @@
     "valid_product_max_hit": {
       "category_id": "14",
       "title": "Valid Product Max Hit",
-      "content": "This is a test product.",
-      "price": "100",
-      "old_price": "120",
-      "status": "1",
-      "keywords": "test, product",
-      "description": "Test product description",
-      "hit": "1"
-    },
-    "valid_product_for_edit": {
-      "id": "",
-      "category_id": "14",
-      "title": "Valid Product For Edit",
       "content": "This is a test product.",
       "price": "100",
       "old_price": "120",

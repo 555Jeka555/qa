@@ -3,7 +3,6 @@ package tests
 import (
 	"github.com/stretchr/testify/assert"
 	"lab8/api"
-	"lab8/model"
 	"testing"
 )
 
@@ -59,17 +58,11 @@ func TestInvalidAddProduct(t *testing.T) {
 			id, err := client.AddProduct(product)
 			assert.ErrorIs(t, err, api.ErrBadRequest)
 
-			createdProducts, err := client.GetAllProducts()
+			products, err := client.GetAllProducts()
 			if err != nil {
 				t.Fatalf("Failed to add product: %v", err)
 			}
-			var createdProduct model.Product
-			for _, p := range createdProducts {
-				if p.ID == id {
-					createdProduct = p
-					break
-				}
-			}
+			createdProduct := FindProductByID(id, products)
 
 			defer func() {
 				if _, err := client.DeleteProduct(createdProduct.ID); err != nil {

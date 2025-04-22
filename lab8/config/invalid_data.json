@@ -24,7 +24,7 @@
       "hit": "1"
     },
     "invalid_category_id_above_range": {
-      "category_id": "14",
+      "category_id": "400",
       "title": "Invalid Category Id Above Rang1e",
       "content": "This is a test product.",
       "price": "100",

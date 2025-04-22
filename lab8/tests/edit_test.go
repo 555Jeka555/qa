@@ -1,76 +1,93 @@
 package tests
 
-//
-//import (
-//	"lab8/api"
-//	"lab8/model"
-//	"testing"
-//)
-//
-//func TestEditProduct(t *testing.T) {
-//	config, err := LoadTestConfig(pathToTestConfig)
-//	if err != nil {
-//		t.Fatalf("Failed to load test config: %v", err)
-//	}
-//
-//	client := api.NewAPIClient(config.BaseURL)
-//
-//	product := config.Products[0]
-//	id, err := client.AddProduct(product)
-//	if err != nil {
-//		t.Fatalf("Failed to setup test: %v", err)
-//	}
-//
-//	createdProducts, err := client.GetAllProducts()
-//	if err != nil {
-//		t.Fatalf("Failed to add product: %v", err)
-//	}
-//	var createdProduct model.Product
-//	for _, p := range createdProducts {
-//		if p.ID == id {
-//			createdProduct = p
-//			break
-//		}
-//	}
-//
-//	defer func() {
-//		if _, err := client.DeleteProduct(createdProduct.ID); err != nil {
-//			t.Errorf("Failed to cleanup product: %v", err)
-//		}
-//	}()
-//
-//	t.Run("Edit product with valid data", func(t *testing.T) {
-//		updated := createdProduct
-//		updated.Title = "Updated Title"
-//		updated.Price = "200"
-//
-//		err := client.EditProduct(updated)
-//		if err != nil {
-//			t.Fatalf("Failed to edit product: %v", err)
-//		}
-//
-//		products, err := client.GetAllProducts()
-//		if err != nil {
-//			t.Fatalf("Failed to add product: %v", err)
-//		}
-//		var updatedProduct model.Product
-//		for _, p := range products {
-//			if p.ID == id {
-//				updatedProduct = p
-//				break
-//			}
-//		}
-//
-//		CompareProducts(t, updated, updatedProduct)
-//	})
-//
-//	t.Run("Edit product with invalid category", func(t *testing.T) {
-//		updated := createdProduct
-//		updated.CategoryID = "999"
-//
-//		err := client.EditProduct(updated)
-//		if err == nil {
-//			t.Error("Expected error for invalid category, but got none")
-//		}
-//	})
-//}
+import (
+	"github.com/stretchr/testify/assert"
+	"lab8/api"
+	"testing"
+)
+
+func TestValidEditProduct(t *testing.T) {
+	config, err := LoadTestConfig(pathToValidTestCasesConfig)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+
+	client := api.NewAPIClient(config.BaseURL)
+	setupProduct := config.TestCases["valid_product_min_category_id"]
+
+	id, err := client.AddProduct(setupProduct)
+	if err != nil {
+		t.Fatalf("Failed to setup test product: %v", err)
+	}
+
+	defer func() {
+		if _, err := client.DeleteProduct(id); err != nil {
+			t.Errorf("Failed to cleanup test product: %v", err)
+		}
+	}()
+
+	for testcaseName, updatedProduct := range config.TestCases {
+		t.Run(testcaseName, func(t *testing.T) {
+			updatedProduct.ID = id
+
+			err = client.EditProduct(updatedProduct)
+			if err != nil {
+				t.Fatalf("Failed to edit product: %v", err)
+			}
+
+			updatedProducts, err := client.GetAllProducts()
+			if err != nil {
+				t.Fatalf("Failed to get updated products: %v", err)
+			}
+			resultProduct := FindProductByID(id, updatedProducts)
+
+			CompareProducts(t, updatedProduct, resultProduct)
+		})
+	}
+}
+
+func TestInvalidEditProduct(t *testing.T) {
+	config, err := LoadTestConfig(pathToInvalidTestCasesConfig)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	validConfig, err := LoadTestConfig(pathToValidTestCasesConfig)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+
+	client := api.NewAPIClient(config.BaseURL)
+	setupProduct := validConfig.TestCases["valid_product_min_category_id"]
+
+	id, err := client.AddProduct(setupProduct)
+	if err != nil {
+		t.Fatalf("Failed to setup test product: %v", err)
+	}
+
+	defer func() {
+		if _, err := client.DeleteProduct(id); err != nil {
+			t.Errorf("Failed to cleanup test product: %v", err)
+		}
+	}()
+
+	for testcaseName, updatedProduct := range config.TestCases {
+		t.Run(testcaseName, func(t *testing.T) {
+			updatedProduct.ID = id
+
+			err = client.EditProduct(updatedProduct)
+			assert.ErrorIs(t, err, api.ErrBadRequest)
+
+			products, err := client.GetAllProducts()
+			if err != nil {
+				t.Fatalf("Failed to add product: %v", err)
+			}
+			createdProduct := FindProductByID(id, products)
+
+			defer func() {
+				if _, err := client.DeleteProduct(createdProduct.ID); err != nil {
+					t.Errorf("Failed to cleanup product: %v", err)
+				}
+			}()
+		})
+	}
+}
