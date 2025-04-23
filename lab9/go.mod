@@ -3,6 +3,7 @@ module lab9
 go 1.23.3
 
 require (
+	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/stretchr/testify v1.10.0
 	github.com/tebeka/selenium v0.9.9
 )
