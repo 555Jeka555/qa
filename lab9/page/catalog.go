@@ -37,11 +37,7 @@ func (c *Catalog) typeInSearchInputSearchProduct(text string) error {
 		return fmt.Errorf("failed to clear input: %v", err)
 	}
 
-	if err := input.SendKeys(text); err != nil {
-		return fmt.Errorf("failed to type text: %v", err)
-	}
-
-	return nil
+	return input.SendKeys(text)
 }
 
 func (c *Catalog) submitSearchProductWithEnter() error {

@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestInMainPage(t *testing.T) {
+func TestSearchInMainPage(t *testing.T) {
 	caps := selenium.Capabilities{"browserName": "chrome"}
 	driver, err := selenium.NewRemote(caps, "http://localhost:4444/wd/hub")
 	assert.NoError(t, err)
@@ -29,7 +29,7 @@ func TestInMainPage(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestInProductPage(t *testing.T) {
+func TestSearchInProductPage(t *testing.T) {
 	caps := selenium.Capabilities{"browserName": "chrome"}
 	driver, err := selenium.NewRemote(caps, "http://localhost:4444/wd/hub")
 	assert.NoError(t, err)
@@ -50,7 +50,7 @@ func TestInProductPage(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestInCategoryPage(t *testing.T) {
+func TestSearchInCategoryPage(t *testing.T) {
 	caps := selenium.Capabilities{"browserName": "chrome"}
 	driver, err := selenium.NewRemote(caps, "http://localhost:4444/wd/hub")
 	assert.NoError(t, err)
@@ -71,7 +71,7 @@ func TestInCategoryPage(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestInSearchPage(t *testing.T) {
+func TestSearchInSearchPage(t *testing.T) {
 	caps := selenium.Capabilities{"browserName": "chrome"}
 	driver, err := selenium.NewRemote(caps, "http://localhost:4444/wd/hub")
 	assert.NoError(t, err)
