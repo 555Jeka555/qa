@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"github.com/brianvoe/gofakeit/v6"
 	"github.com/stretchr/testify/assert"
 	"github.com/tebeka/selenium"
 	"lab9/config"
@@ -9,93 +10,98 @@ import (
 )
 
 func TestMadeOrderLoggedSuccessful(t *testing.T) {
-	caps := selenium.Capabilities{"browserName": "chrome"}
-	driver, err := selenium.NewRemote(caps, "http://localhost:4444/wd/hub")
-	assert.NoError(t, err)
+	testFunc := func(t *testing.T, driver selenium.WebDriver) {
+		cfg := config.GetValidLoginData()
 
-	defer driver.Quit()
+		authPage := page.Auth{}
+		authPage.Init(driver)
+		err := authPage.OpenPage(config.LoginUrl)
+		assert.NoError(t, err)
 
-	cfg := config.GetValidLoginData()
+		err = authPage.Login(cfg.Login, cfg.Password)
+		assert.NoError(t, err)
 
-	authPage := page.Auth{}
-	authPage.Init(driver)
-	err = authPage.OpenPage(config.LoginUrl)
-	assert.NoError(t, err)
+		isLoginSuccessful, err := authPage.IsLoginSuccessful()
+		assert.NoError(t, err)
+		assert.True(t, isLoginSuccessful)
 
-	err = authPage.Login(cfg.Login, cfg.Password)
-	assert.NoError(t, err)
+		orderPage := page.Order{}
+		orderPage.Init(driver)
+		err = orderPage.OpenPage(config.ProductURL)
+		assert.NoError(t, err)
 
-	isLoginSuccessful, err := authPage.IsLoginSuccessful()
-	assert.NoError(t, err)
-	assert.True(t, isLoginSuccessful)
+		err = orderPage.AddToCart()
+		assert.NoError(t, err)
 
-	orderPage := page.Order{}
-	orderPage.Init(driver)
-	err = orderPage.OpenPage(config.ProductURL)
-	assert.NoError(t, err)
+		err = orderPage.ClickOrderButton()
+		assert.NoError(t, err)
 
-	err = orderPage.AddToCart()
-	assert.NoError(t, err)
+		err = orderPage.FillOrderForm(config.ExistingToOrderData.Note)
+		assert.NoError(t, err)
 
-	err = orderPage.ClickOrderButton()
-	assert.NoError(t, err)
+		isSuccess, err := orderPage.IsOrderMadeSuccessful()
+		assert.NoError(t, err)
+		assert.True(t, isSuccess)
+	}
 
-	err = orderPage.FillOrderForm(config.ExistingToOrderData.Note)
-	assert.NoError(t, err)
-
-	isSuccess, err := orderPage.IsOrderMadeSuccessful()
-	assert.NoError(t, err)
-	assert.True(t, isSuccess)
+	runTestForBrowser(t, "chrome", testFunc)
+	runTestForBrowser(t, "firefox", testFunc)
 }
 
 func TestMadeOrderSuccessful(t *testing.T) {
-	caps := selenium.Capabilities{"browserName": "chrome"}
-	driver, err := selenium.NewRemote(caps, "http://localhost:4444/wd/hub")
-	assert.NoError(t, err)
+	testFunc := func(t *testing.T, driver selenium.WebDriver) {
+		orderPage := page.Order{}
+		orderPage.Init(driver)
+		err := orderPage.OpenPage(config.ProductURL)
+		assert.NoError(t, err)
 
-	defer driver.Quit()
+		err = orderPage.AddToCart()
+		assert.NoError(t, err)
 
-	orderPage := page.Order{}
-	orderPage.Init(driver)
-	err = orderPage.OpenPage(config.ProductURL)
-	assert.NoError(t, err)
+		err = orderPage.ClickOrderButton()
+		assert.NoError(t, err)
 
-	err = orderPage.AddToCart()
-	assert.NoError(t, err)
+		validData := config.OrderData{
+			Login:    gofakeit.Username(),
+			Password: gofakeit.Password(true, true, true, true, false, 8),
+			Name:     gofakeit.Name(),
+			Email:    gofakeit.Email(),
+			Address:  "Йошкар-Ола, ул. Вознесенская, 110",
+			Note:     "note note note",
+		}
+		err = orderPage.FillFullOrderForm(validData)
+		assert.NoError(t, err)
 
-	err = orderPage.ClickOrderButton()
-	assert.NoError(t, err)
+		isSuccess, err := orderPage.IsOrderMadeSuccessful()
+		assert.NoError(t, err)
+		assert.True(t, isSuccess)
+	}
 
-	err = orderPage.FillFullOrderForm(config.ValidToOrderData)
-	assert.NoError(t, err)
-
-	isSuccess, err := orderPage.IsOrderMadeSuccessful()
-	assert.NoError(t, err)
-	assert.True(t, isSuccess)
+	runTestForBrowser(t, "chrome", testFunc)
+	runTestForBrowser(t, "firefox", testFunc)
 }
 
 func TestMadeOrderFailed(t *testing.T) {
-	caps := selenium.Capabilities{"browserName": "chrome"}
-	driver, err := selenium.NewRemote(caps, "http://localhost:4444/wd/hub")
-	assert.NoError(t, err)
+	testFunc := func(t *testing.T, driver selenium.WebDriver) {
+		orderPage := page.Order{}
+		orderPage.Init(driver)
+		err := orderPage.OpenPage(config.ProductURL)
+		assert.NoError(t, err)
 
-	defer driver.Quit()
+		err = orderPage.AddToCart()
+		assert.NoError(t, err)
 
-	orderPage := page.Order{}
-	orderPage.Init(driver)
-	err = orderPage.OpenPage(config.ProductURL)
-	assert.NoError(t, err)
+		err = orderPage.ClickOrderButton()
+		assert.NoError(t, err)
 
-	err = orderPage.AddToCart()
-	assert.NoError(t, err)
+		err = orderPage.FillFullOrderForm(config.ExistingToOrderData)
+		assert.NoError(t, err)
 
-	err = orderPage.ClickOrderButton()
-	assert.NoError(t, err)
+		isFailed, err := orderPage.IsOrderMadeFailed()
+		assert.NoError(t, err)
+		assert.True(t, isFailed)
+	}
 
-	err = orderPage.FillFullOrderForm(config.ExistingToOrderData)
-	assert.NoError(t, err)
-
-	isFailed, err := orderPage.IsOrderMadeFailed()
-	assert.NoError(t, err)
-	assert.True(t, isFailed)
+	runTestForBrowser(t, "chrome", testFunc)
+	runTestForBrowser(t, "firefox", testFunc)
 }

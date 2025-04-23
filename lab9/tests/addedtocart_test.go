@@ -9,64 +9,61 @@ import (
 )
 
 func TestAddToCartInMainPage(t *testing.T) {
-	caps := selenium.Capabilities{"browserName": "chrome"}
-	driver, err := selenium.NewRemote(caps, "http://localhost:4444/wd/hub")
-	assert.NoError(t, err)
+	testFunc := func(t *testing.T, driver selenium.WebDriver) {
+		productCasio := config.ProductCasio
+		productPage := page.Product{}
+		productPage.Init(driver)
+		err := productPage.OpenPage("")
+		assert.NoError(t, err)
 
-	defer driver.Quit()
+		err = productPage.AddToCart(productCasio.ID)
+		assert.NoError(t, err)
 
-	productCasio := config.ProductCasio
-	productPage := page.Product{}
-	productPage.Init(driver)
-	err = productPage.OpenPage("")
-	assert.NoError(t, err)
+		err = productPage.IsProductInCart(productCasio.Name, productCasio.Price, config.QuantityProductsOne)
+		assert.NoError(t, err)
+	}
 
-	err = productPage.AddToCart(productCasio.ID)
-	assert.NoError(t, err)
-
-	err = productPage.IsProductInCart(productCasio.Name, productCasio.Price, config.QuantityProductsOne)
-	assert.NoError(t, err)
+	runTestForBrowser(t, "chrome", testFunc)
+	runTestForBrowser(t, "firefox", testFunc)
 }
 
 func TestAddOneToCartInProductPage(t *testing.T) {
-	caps := selenium.Capabilities{"browserName": "chrome"}
-	driver, err := selenium.NewRemote(caps, "http://localhost:4444/wd/hub")
-	assert.NoError(t, err)
+	testFunc := func(t *testing.T, driver selenium.WebDriver) {
+		productCasio := config.ProductCasio
+		productPage := page.Product{}
+		productPage.Init(driver)
+		err := productPage.OpenPage(productCasio.URL)
+		assert.NoError(t, err)
 
-	defer driver.Quit()
+		err = productPage.AddToCart(productCasio.ID)
+		assert.NoError(t, err)
 
-	productCasio := config.ProductCasio
-	productPage := page.Product{}
-	productPage.Init(driver)
-	err = productPage.OpenPage(productCasio.URL)
-	assert.NoError(t, err)
+		err = productPage.IsProductInCart(productCasio.Name, productCasio.Price, config.QuantityProductsOne)
+		assert.NoError(t, err)
+	}
 
-	err = productPage.AddToCart(productCasio.ID)
-	assert.NoError(t, err)
-
-	err = productPage.IsProductInCart(productCasio.Name, productCasio.Price, config.QuantityProductsOne)
-	assert.NoError(t, err)
+	runTestForBrowser(t, "chrome", testFunc)
+	runTestForBrowser(t, "firefox", testFunc)
 }
 
 func TestAddSeveralToCartInProductPage(t *testing.T) {
-	caps := selenium.Capabilities{"browserName": "chrome"}
-	driver, err := selenium.NewRemote(caps, "http://localhost:4444/wd/hub")
-	assert.NoError(t, err)
+	testFunc := func(t *testing.T, driver selenium.WebDriver) {
+		productCasio := config.ProductCasio
+		productPage := page.Product{}
+		productPage.Init(driver)
+		err := productPage.OpenPage(productCasio.URL)
+		assert.NoError(t, err)
 
-	defer driver.Quit()
+		err = productPage.SetProductQuantity(config.QuantityProductsTen)
+		assert.NoError(t, err)
 
-	productCasio := config.ProductCasio
-	productPage := page.Product{}
-	productPage.Init(driver)
-	err = productPage.OpenPage(productCasio.URL)
-	assert.NoError(t, err)
+		err = productPage.AddToCart(productCasio.ID)
+		assert.NoError(t, err)
 
-	err = productPage.SetProductQuantity(config.QuantityProductsTen)
-	assert.NoError(t, err)
+		err = productPage.IsProductInCart(productCasio.Name, productCasio.Price, config.QuantityProductsTen)
+		assert.NoError(t, err)
+	}
 
-	err = productPage.AddToCart(productCasio.ID)
-	assert.NoError(t, err)
-
-	err = productPage.IsProductInCart(productCasio.Name, productCasio.Price, config.QuantityProductsTen)
-	assert.NoError(t, err)
+	runTestForBrowser(t, "chrome", testFunc)
+	runTestForBrowser(t, "firefox", testFunc)
 }

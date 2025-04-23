@@ -11,45 +11,43 @@ import (
 )
 
 func TestSuccessfulAuth(t *testing.T) {
-	caps := selenium.Capabilities{"browserName": "chrome"}
-	driver, err := selenium.NewRemote(caps, "http://localhost:4444/wd/hub")
-	assert.NoError(t, err)
+	testFunc := func(t *testing.T, driver selenium.WebDriver) {
+		cfg := config.GetValidLoginData()
 
-	defer driver.Quit()
+		authPage := page.Auth{}
+		authPage.Init(driver)
+		err := authPage.OpenPage(config.LoginUrl)
+		assert.NoError(t, err)
 
-	cfg := config.GetValidLoginData()
+		err = authPage.Login(cfg.Login, cfg.Password)
+		assert.NoError(t, err)
 
-	authPage := page.Auth{}
-	authPage.Init(driver)
-	err = authPage.OpenPage(config.LoginUrl)
-	assert.NoError(t, err)
+		isLoginSuccessful, err := authPage.IsLoginSuccessful()
+		assert.NoError(t, err)
+		assert.True(t, isLoginSuccessful)
+	}
 
-	err = authPage.Login(cfg.Login, cfg.Password)
-	assert.NoError(t, err)
-
-	isLoginSuccessful, err := authPage.IsLoginSuccessful()
-	assert.NoError(t, err)
-	assert.True(t, isLoginSuccessful)
+	runTestForBrowser(t, "chrome", testFunc)
+	runTestForBrowser(t, "firefox", testFunc)
 }
 
 func TestFailedAuth(t *testing.T) {
-	caps := selenium.Capabilities{"browserName": "chrome"}
-	driver, err := selenium.NewRemote(caps, "http://localhost:4444/wd/hub")
-	assert.NoError(t, err)
+	testFunc := func(t *testing.T, driver selenium.WebDriver) {
+		cfg := config.GetInvalidLoginData()
 
-	defer driver.Quit()
+		authPage := page.Auth{}
+		authPage.Init(driver)
+		err := authPage.OpenPage(config.LoginUrl)
+		assert.NoError(t, err)
 
-	cfg := config.GetInvalidLoginData()
+		err = authPage.Login(cfg.Login, cfg.Password)
+		assert.NoError(t, err)
 
-	authPage := page.Auth{}
-	authPage.Init(driver)
-	err = authPage.OpenPage(config.LoginUrl)
-	assert.NoError(t, err)
+		isLoginFailed, err := authPage.IsLoginError()
+		assert.NoError(t, err)
+		assert.True(t, isLoginFailed)
+	}
 
-	err = authPage.Login(cfg.Login, cfg.Password)
-	assert.NoError(t, err)
-
-	isLoginFailed, err := authPage.IsLoginError()
-	assert.NoError(t, err)
-	assert.True(t, isLoginFailed)
+	runTestForBrowser(t, "chrome", testFunc)
+	runTestForBrowser(t, "firefox", testFunc)
 }
