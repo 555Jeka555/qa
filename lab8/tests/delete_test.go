@@ -1,9 +1,11 @@
 package tests
 
 import (
-	"github.com/stretchr/testify/assert"
-	"lab8/api"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"lab8/api"
 )
 
 func TestDeleteProduct(t *testing.T) {

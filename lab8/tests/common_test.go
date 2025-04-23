@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	pathToValidTestCasesConfig   = "../config/valid_data.json"
-	pathToInvalidTestCasesConfig = "../config/invalid_data.json"
+	pathToValidTestCasesConfig   = "../config/validdata.json"
+	pathToInvalidTestCasesConfig = "../config/invaliddata.json"
 )
 
 type TestConfig struct {
