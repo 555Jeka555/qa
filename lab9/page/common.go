@@ -54,9 +54,9 @@ func (c *Common) WaitForElements(by, value string, timeout time.Duration) ([]sel
 }
 
 func (c *Common) FindElement(by, value string) (selenium.WebElement, error) {
-	return c.WaitForElement(by, value, 10*time.Second)
+	return c.WaitForElement(by, value, 8*time.Second)
 }
 
 func (c *Common) FindElements(by, value string) ([]selenium.WebElement, error) {
-	return c.WaitForElements(by, value, 10*time.Second)
+	return c.WaitForElements(by, value, 8*time.Second)
 }

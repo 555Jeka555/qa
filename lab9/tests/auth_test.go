@@ -13,53 +13,43 @@ import (
 func TestSuccessfulAuth(t *testing.T) {
 	caps := selenium.Capabilities{"browserName": "chrome"}
 	driver, err := selenium.NewRemote(caps, "http://localhost:4444/wd/hub")
-	if err != nil {
-		t.Fatalf("Failed to open session: %v", err)
-	}
+	assert.NoError(t, err)
+
 	defer driver.Quit()
 
 	cfg := config.GetValidLoginData()
 
 	authPage := page.Auth{}
 	authPage.Init(driver)
-	if err := authPage.OpenPage(config.LoginUrl); err != nil {
-		t.Fatalf("Failed to load page: %v", err)
-	}
+	err = authPage.OpenPage(config.LoginUrl)
+	assert.NoError(t, err)
 
-	if err := authPage.Login(cfg.Login, cfg.Password); err != nil {
-		t.Fatalf("Login failed: %v", err)
-	}
+	err = authPage.Login(cfg.Login, cfg.Password)
+	assert.NoError(t, err)
 
 	isLoginSuccessful, err := authPage.IsLoginSuccessful()
-	if err != nil {
-		t.Fatalf("Failed to get success message: %v", err)
-	}
+	assert.NoError(t, err)
 	assert.True(t, isLoginSuccessful)
 }
 
 func TestFailedAuth(t *testing.T) {
 	caps := selenium.Capabilities{"browserName": "chrome"}
 	driver, err := selenium.NewRemote(caps, "http://localhost:4444/wd/hub")
-	if err != nil {
-		t.Fatalf("Failed to open session: %v", err)
-	}
+	assert.NoError(t, err)
+
 	defer driver.Quit()
 
 	cfg := config.GetInvalidLoginData()
 
 	authPage := page.Auth{}
 	authPage.Init(driver)
-	if err := authPage.OpenPage(config.LoginUrl); err != nil {
-		t.Fatalf("Failed to load page: %v", err)
-	}
+	err = authPage.OpenPage(config.LoginUrl)
+	assert.NoError(t, err)
 
-	if err := authPage.Login(cfg.Login, cfg.Password); err != nil {
-		t.Fatalf("Login failed: %v", err)
-	}
+	err = authPage.Login(cfg.Login, cfg.Password)
+	assert.NoError(t, err)
 
 	isLoginFailed, err := authPage.IsLoginError()
-	if err != nil {
-		t.Fatalf("Failed to get success message: %v", err)
-	}
+	assert.NoError(t, err)
 	assert.True(t, isLoginFailed)
 }
