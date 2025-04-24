@@ -13,15 +13,13 @@ func TestSearchInMainPage(t *testing.T) {
 		catalogPage := page.Catalog{}
 		catalogPage.Init(driver)
 		err := catalogPage.OpenPage("")
-		assert.NoError(t, err)
+		assert.NoError(t, err, "Не удалось открыть главную страницу")
 
 		err = catalogPage.SearchProduct(config.ProductNameCasio)
-		assert.NoError(t, err)
+		assert.NoError(t, err, "Ошибка при поиске товара Casio")
 
 		err = catalogPage.FindProduct(config.ProductNameCasio) // "Eldors Post"
-		//url, _ := catalogPage.Driver.CurrentURL()
-		//fmt.Println("page", url)
-		assert.NoError(t, err)
+		assert.NoError(t, err, "Товар Casio не найден на странице")
 	}
 
 	runTestForBrowser(t, "chrome", testFunc)
@@ -33,15 +31,13 @@ func TestSearchInProductPage(t *testing.T) {
 		catalogPage := page.Catalog{}
 		catalogPage.Init(driver)
 		err := catalogPage.OpenPage(config.ProductPageUrl)
-		assert.NoError(t, err)
+		assert.NoError(t, err, "Не удалось открыть страницу продукта")
 
 		err = catalogPage.SearchProduct(config.ProductNameRoyal)
-		assert.NoError(t, err)
+		assert.NoError(t, err, "Ошибка при поиске товара Royal")
 
 		err = catalogPage.FindProduct(config.ProductNameRoyal) // "Eldors Post"
-		//url, _ := catalogPage.Driver.CurrentURL()
-		//fmt.Println("page", url)
-		assert.NoError(t, err)
+		assert.NoError(t, err, "Товар Royal не найден на странице продукта")
 	}
 
 	runTestForBrowser(t, "chrome", testFunc)
@@ -53,15 +49,13 @@ func TestSearchInCategoryPage(t *testing.T) {
 		catalogPage := page.Catalog{}
 		catalogPage.Init(driver)
 		err := catalogPage.OpenPage(config.CategoryPageUrl)
-		assert.NoError(t, err)
+		assert.NoError(t, err, "Не удалось открыть страницу категории")
 
 		err = catalogPage.SearchProduct(config.ProductNameRoyal)
-		assert.NoError(t, err)
+		assert.NoError(t, err, "Ошибка при поиске товара Royal в категории")
 
 		err = catalogPage.FindProduct(config.ProductNameRoyal) // "Eldors Post"
-		//url, _ := catalogPage.Driver.CurrentURL()
-		//fmt.Println("page", url)
-		assert.NoError(t, err)
+		assert.NoError(t, err, "Товар Royal не найден в категории")
 	}
 
 	runTestForBrowser(t, "chrome", testFunc)
@@ -73,15 +67,13 @@ func TestSearchInSearchPage(t *testing.T) {
 		catalogPage := page.Catalog{}
 		catalogPage.Init(driver)
 		err := catalogPage.OpenPage(config.SearchPageUrl)
-		assert.NoError(t, err)
+		assert.NoError(t, err, "Не удалось открыть страницу поиска")
 
 		err = catalogPage.SearchProduct(config.ProductNameCitizen)
-		assert.NoError(t, err)
+		assert.NoError(t, err, "Ошибка при поиске товара Citizen")
 
 		err = catalogPage.FindProduct(config.ProductNameCitizen) // "Eldors Post"
-		//url, _ := catalogPage.Driver.CurrentURL()
-		//fmt.Println("page", url)
-		assert.NoError(t, err)
+		assert.NoError(t, err, "Товар Citizen не найден на странице поиска")
 	}
 
 	runTestForBrowser(t, "chrome", testFunc)

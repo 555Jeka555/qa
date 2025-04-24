@@ -17,14 +17,14 @@ func TestSuccessfulAuth(t *testing.T) {
 		authPage := page.Auth{}
 		authPage.Init(driver)
 		err := authPage.OpenPage(config.LoginUrl)
-		assert.NoError(t, err)
+		assert.NoError(t, err, "Не удалось открыть страницу авторизации")
 
 		err = authPage.Login(cfg.Login, cfg.Password)
-		assert.NoError(t, err)
+		assert.NoError(t, err, "Ошибка при вводе валидных учетных данных")
 
 		isLoginSuccessful, err := authPage.IsLoginSuccessful()
-		assert.NoError(t, err)
-		assert.True(t, isLoginSuccessful)
+		assert.NoError(t, err, "Ошибка при проверке успешной авторизации")
+		assert.True(t, isLoginSuccessful, "Ожидалась успешная авторизация, но она не прошла")
 	}
 
 	runTestForBrowser(t, "chrome", testFunc)
@@ -38,14 +38,14 @@ func TestFailedAuth(t *testing.T) {
 		authPage := page.Auth{}
 		authPage.Init(driver)
 		err := authPage.OpenPage(config.LoginUrl)
-		assert.NoError(t, err)
+		assert.NoError(t, err, "Не удалось открыть страницу авторизации")
 
 		err = authPage.Login(cfg.Login, cfg.Password)
-		assert.NoError(t, err)
+		assert.NoError(t, err, "Ошибка при вводе невалидных учетных данных")
 
 		isLoginFailed, err := authPage.IsLoginError()
-		assert.NoError(t, err)
-		assert.True(t, isLoginFailed)
+		assert.NoError(t, err, "Ошибка при проверке сообщения об ошибке")
+		assert.True(t, isLoginFailed, "Ожидалась ошибка авторизации, но она не появилась")
 	}
 
 	runTestForBrowser(t, "chrome", testFunc)
