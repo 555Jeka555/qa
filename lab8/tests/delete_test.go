@@ -10,49 +10,41 @@ import (
 
 func TestDeleteProduct(t *testing.T) {
 	config, err := LoadTestConfig(pathToValidTestCasesConfig)
-	if err != nil {
-		t.Fatalf("Failed to load test config: %v", err)
-	}
+	assert.NoError(t, err, "Не удалось загрузить конфиг теста")
 
 	client := api.NewAPIClient(config.BaseURL)
 
 	product := config.TestCases["valid_product_min_category_id"]
 	id, err := client.AddProduct(product)
-	if err != nil {
-		t.Fatalf("Failed to setup test: %v", err)
-	}
+	assert.NoError(t, err, "Не удалось создать продукт для теста")
 
 	createdProducts, err := client.GetAllProducts()
-	if err != nil {
-		t.Fatalf("Failed to add product: %v", err)
-	}
+	assert.NoError(t, err, "Не удалось получить список продуктов после добавления")
+
 	createdProduct := FindProductByID(id, createdProducts)
+	assert.NotNil(t, createdProduct, "Созданный продукт не найден в списке продуктов")
 
 	t.Run("Delete existing product", func(t *testing.T) {
 		status, err := client.DeleteProduct(createdProduct.ID)
-		if err != nil {
-			t.Fatalf("Failed to delete product: %v", err)
-		}
-		assert.Equal(t, status, 1)
+		assert.NoError(t, err, "Ошибка при удалении существующего продукта")
+		assert.Equal(t, status, 1, "Статус удаления существующего продукта должен быть 1")
 
 		products, err := client.GetAllProducts()
-		if err != nil {
-			t.Fatalf("Failed to get products: %v", err)
-		}
+		assert.NoError(t, err, "Не удалось получить список продуктов после удаления")
 
+		found := false
 		for _, p := range products {
 			if p.ID == createdProduct.ID {
-				t.Error("Product still exists after deletion")
+				found = true
 				break
 			}
 		}
+		assert.False(t, found, "Продукт всё ещё существует после удаления")
 	})
 
 	t.Run("Delete non-existing product", func(t *testing.T) {
 		status, err := client.DeleteProduct("-999999")
-		if err != nil {
-			t.Fatalf("Failed to delete product: %v", err)
-		}
-		assert.Equal(t, status, 0)
+		assert.NoError(t, err, "Ошибка при попытке удалить несуществующий продукт")
+		assert.Equal(t, status, 0, "Статус удаления несуществующего продукта должен быть 0")
 	})
 }

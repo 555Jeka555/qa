@@ -51,8 +51,13 @@ func CompareProducts(t *testing.T, expected, actual model.Product) {
 	}
 
 	for _, field := range fields {
-		assert.Equal(t, field.expected, field.actual,
-			"%s mismatch", field.name)
+		assert.Equal(
+			t,
+			field.expected,
+			field.actual,
+			"%s mismatch",
+			field.name,
+		)
 	}
 }
 

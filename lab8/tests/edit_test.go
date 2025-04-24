@@ -8,22 +8,17 @@ import (
 
 func TestValidEditProduct(t *testing.T) {
 	config, err := LoadTestConfig(pathToValidTestCasesConfig)
-	if err != nil {
-		t.Fatalf("Failed to load test config: %v", err)
-	}
+	assert.NoError(t, err, "Не удалось загрузить конфигурацию тестов")
 
 	client := api.NewAPIClient(config.BaseURL)
 	setupProduct := config.TestCases["valid_product_min_category_id"]
 
 	id, err := client.AddProduct(setupProduct)
-	if err != nil {
-		t.Fatalf("Failed to setup test product: %v", err)
-	}
+	assert.NoError(t, err, "Ошибка при создании тестового продукта")
 
 	defer func() {
-		if _, err := client.DeleteProduct(id); err != nil {
-			t.Errorf("Failed to cleanup test product: %v", err)
-		}
+		_, err := client.DeleteProduct(id)
+		assert.NoError(t, err, "Ошибка при удалении тестового продукта")
 	}()
 
 	for testcaseName, updatedProduct := range config.TestCases {
@@ -31,15 +26,13 @@ func TestValidEditProduct(t *testing.T) {
 			updatedProduct.ID = id
 
 			err = client.EditProduct(updatedProduct)
-			if err != nil {
-				t.Fatalf("Failed to edit product: %v", err)
-			}
+			assert.NoError(t, err, "Ошибка при редактировании продукта")
 
 			updatedProducts, err := client.GetAllProducts()
-			if err != nil {
-				t.Fatalf("Failed to get updated products: %v", err)
-			}
+			assert.NoError(t, err, "Ошибка при получении списка продуктов")
+
 			resultProduct := FindProductByID(id, updatedProducts)
+			assert.NotNil(t, resultProduct, "Продукт не найден после редактирования")
 
 			CompareProducts(t, updatedProduct, resultProduct)
 		})
@@ -48,26 +41,20 @@ func TestValidEditProduct(t *testing.T) {
 
 func TestInvalidEditProduct(t *testing.T) {
 	config, err := LoadTestConfig(pathToInvalidTestCasesConfig)
-	if err != nil {
-		t.Fatalf("Failed to load test config: %v", err)
-	}
+	assert.NoError(t, err, "Не удалось загрузить конфигурацию невалидных тестов")
+
 	validConfig, err := LoadTestConfig(pathToValidTestCasesConfig)
-	if err != nil {
-		t.Fatalf("Failed to load test config: %v", err)
-	}
+	assert.NoError(t, err, "Не удалось загрузить валидную конфигурацию")
 
 	client := api.NewAPIClient(config.BaseURL)
 	setupProduct := validConfig.TestCases["valid_product_min_category_id"]
 
 	id, err := client.AddProduct(setupProduct)
-	if err != nil {
-		t.Fatalf("Failed to setup test product: %v", err)
-	}
+	assert.NoError(t, err, "Ошибка при создании тестового продукта")
 
 	defer func() {
-		if _, err := client.DeleteProduct(id); err != nil {
-			t.Errorf("Failed to cleanup test product: %v", err)
-		}
+		_, err := client.DeleteProduct(id)
+		assert.NoError(t, err, "Ошибка при удалении тестового продукта")
 	}()
 
 	for testcaseName, updatedProduct := range config.TestCases {
@@ -75,19 +62,15 @@ func TestInvalidEditProduct(t *testing.T) {
 			updatedProduct.ID = id
 
 			err = client.EditProduct(updatedProduct)
-			assert.ErrorIs(t, err, api.ErrBadRequest)
+			assert.ErrorIs(t, err, api.ErrBadRequest, "Ожидалась ошибка BadRequest")
 
 			products, err := client.GetAllProducts()
-			if err != nil {
-				t.Fatalf("Failed to add product: %v", err)
-			}
-			createdProduct := FindProductByID(id, products)
+			assert.NoError(t, err, "Ошибка при получении списка продуктов")
 
-			defer func() {
-				if _, err := client.DeleteProduct(createdProduct.ID); err != nil {
-					t.Errorf("Failed to cleanup product: %v", err)
-				}
-			}()
+			createdProduct := FindProductByID(id, products)
+			assert.NotNil(t, createdProduct, "Продукт не должен быть удалён при невалидном редактировании")
+
+			CompareProducts(t, setupProduct, createdProduct)
 		})
 	}
 }

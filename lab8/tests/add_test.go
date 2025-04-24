@@ -8,60 +8,48 @@ import (
 
 func TestValidAddProduct(t *testing.T) {
 	config, err := LoadTestConfig(pathToValidTestCasesConfig)
-	if err != nil {
-		t.Fatalf("Failed to load test config: %v", err)
-	}
+	assert.NoError(t, err, "Не удалось загрузить конфигурацию тестов")
 
 	client := api.NewAPIClient(config.BaseURL)
 
 	for testcaseName, product := range config.TestCases {
 		t.Run(testcaseName, func(t *testing.T) {
 			id, err := client.AddProduct(product)
-			if err != nil {
-				t.Fatalf("Failed to add product: %v", err)
-			}
+			assert.NoError(t, err, "Ошибка при добавлении продукта")
 
 			products, err := client.GetAllProducts()
-			if err != nil {
-				t.Fatalf("Failed to add product: %v", err)
-			}
+			assert.NoError(t, err, "Ошибка при получении списка продуктов")
+
 			createdProduct := FindProductByID(id, products)
+			assert.NotNil(t, createdProduct, "Продукт не найден после добавления")
 
 			defer func() {
-				if _, err := client.DeleteProduct(createdProduct.ID); err != nil {
-					t.Errorf("Failed to cleanup product: %v", err)
-				}
+				_, err := client.DeleteProduct(createdProduct.ID)
+				assert.NoError(t, err, "Ошибка при удалении тестового продукта")
 			}()
 
 			CompareProducts(t, product, createdProduct)
 
-			if createdProduct.ID == "0" {
-				t.Error("Product ID should not be 0")
-			}
-			if createdProduct.Alias == "" {
-				t.Error("Alias should be generated")
-			}
+			assert.NotEqual(t, "0", createdProduct.ID, "ID продукта не должен быть '0'")
+			assert.NotEmpty(t, createdProduct.Alias, "Alias продукта должен быть сгенерирован автоматически")
 		})
 	}
 }
 
 func TestInvalidAddProduct(t *testing.T) {
 	config, err := LoadTestConfig(pathToInvalidTestCasesConfig)
-	if err != nil {
-		t.Fatalf("Failed to load test config: %v", err)
-	}
+	assert.NoError(t, err, "Не удалось загрузить конфигурацию тестов")
 
 	client := api.NewAPIClient(config.BaseURL)
 
 	for testcaseName, product := range config.TestCases {
 		t.Run(testcaseName, func(t *testing.T) {
 			id, err := client.AddProduct(product)
-			assert.ErrorIs(t, err, api.ErrBadRequest)
+			assert.ErrorIs(t, err, api.ErrBadRequest, "Ожидалась ошибка BadRequest для невалидных данных")
 
 			products, err := client.GetAllProducts()
-			if err != nil {
-				t.Fatalf("Failed to add product: %v", err)
-			}
+			assert.NoError(t, err, "Ошибка при получении списка продуктов")
+
 			createdProduct := FindProductByID(id, products)
 
 			defer func() {
