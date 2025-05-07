@@ -1,9 +1,10 @@
 package tests
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/tebeka/selenium"
-	"testing"
 )
 
 func runTestForBrowser(t *testing.T, browserName string, testFunc func(*testing.T, selenium.WebDriver)) {
