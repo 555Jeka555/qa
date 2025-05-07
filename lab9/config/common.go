@@ -1,3 +1,3 @@
 package config
 
-const BaseUrl = "http://shop.qatl.ru"
+const BaseUrl = "http://host.docker.internal:8080"
